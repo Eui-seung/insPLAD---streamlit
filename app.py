@@ -1,6 +1,7 @@
 import streamlit as st
 from PIL import Image
 
+
 st.title("insPLAD 이상탐지 시스템")
 
 uploaded = st.file_uploader("이미지 업로드", type=["jpg","png","jpeg"])

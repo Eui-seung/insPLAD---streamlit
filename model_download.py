@@ -1,5 +1,12 @@
-from sentence_transformers import SentenceTransformer
+# from optimum.intel import OVModelForFeatureExtraction
+from optimum.intel import OVSentenceTransformer
+# from transformers import AutoTokenizer
 
-# 모델을 온라인에서 다운로드 후 로컬 폴더에 저장
-model = SentenceTransformer("BAAI/bge-small-en-v1.5")
-model.save("./models/bge-small-local")
+save_path = "./models/bge-small-ov2"
+model_id = "./models/bge-small-local"
+
+model = OVSentenceTransformer.from_pretrained(model_id, export=True)
+
+model.save_pretrained(save_path)
+
+print("OpenVINO 모델 저장 완료!")
