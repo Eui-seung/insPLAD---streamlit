@@ -1,0 +1,17 @@
+streamlit
+onnxruntime
+opencv-python
+numpy
+Pillow
+chromadb
+sentence-transformers
+openai
+ragas
+langchain
+boto3
+matplotlib
+langchain-huggingface
+boto3 python-dotenv
+torch
+torchvision
+torchaudio

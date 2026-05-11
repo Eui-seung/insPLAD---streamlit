@@ -1,0 +1,5 @@
+.env
+models/
+chroma_db/
+venv/
+*.jpg
