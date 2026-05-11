@@ -4,7 +4,7 @@ from sentence_transformers import SentenceTransformer
 
 @st.cache_resource
 def model_load():
-    return SentenceTransformer("BAAI/bge-small-en-v1.5") 
+    return SentenceTransformer("./models/bge-small-local") 
 
 @st.cache_resource
 def get_collection():
