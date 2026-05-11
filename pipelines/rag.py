@@ -14,18 +14,26 @@ def get_collection():
 def search(query: str, class_name: str = None, top_k: int = 3):
     collection = get_collection()
     model = model_load()
-    embedding = model.encode(
-        [f"Represent this sentence: {query}"],
-        normalize_embeddings=True
-    ).tolist()
 
-    where = {"class": class_name} if class_name else None
+    with st.status("전력 설비 데이터 분석 중...", expanded=True) as status:
+        st.write("1. 텍스트 임베딩 생성중... (BGE-small)")
+        embedding = model.encode(
+            [f"Represent this sentence: {query}"],
+            normalize_embeddings=True,
+        ).tolist()
 
-    results = collection.query(
-        query_embeddings=embedding,
-        n_results=top_k,
-        where=where  # 필터
-    )
+        st.write("2. chromaDB 내 이상 징후 검색 중")
+
+        where = {"class": class_name} if class_name else None
+
+        results = collection.query(
+            query_embeddings=embedding,
+            n_results=top_k,
+            where=where  # 필터
+        )
+        st.write("3. 기술 문서 추출 중...")
+
+        status.update(label="분석 완료!", state="complete", expanded=False)
     return results["documents"][0]
 
 

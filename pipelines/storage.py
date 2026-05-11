@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+
 s3 = boto3.client("s3", region_name="ap-northeast-2")
 dynamodb = boto3.resource("dynamodb", region_name="ap-northeast-2")
 table = dynamodb.Table("insplad_log")
