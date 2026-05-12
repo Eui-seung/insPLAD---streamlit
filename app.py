@@ -56,8 +56,8 @@ if uploaded:
 
             # ── 3. 평가 ─────────────────────────────────────
             with st.spinner("RAGAS 평가 중 (3개 조건)..."):
-                from pipeline.evaluation import evaluate_three_conditions
-                scores = evaluate_three_conditions(query, docs, report_a, report_b, report_c)
+                from pipeline.evaluation import evaluate_report
+                scores = evaluate_report(query, docs, report_a, report_b, report_c)
 
             # ── 4. 탭으로 나란히 비교 ────────────────────────
             st.markdown("### 비교 평가 결과")
