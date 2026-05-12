@@ -23,6 +23,7 @@ class LuxiaRagasLLM(BaseRagasLLM):
     def __init__(self, api_key, model="gpt-4o-mini"):
         self.api_key = api_key
         self.url = f"https://bridge.luxiacloud.com/llm/openai/chat/completions/{model}/create"
+        self.model = model
 
     def is_finished(self, *args):
         return True
