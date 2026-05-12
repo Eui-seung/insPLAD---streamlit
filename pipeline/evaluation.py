@@ -32,6 +32,7 @@ class LuxiaRagasLLM(BaseRagasLLM):
 
     def generate_text(self, prompt, **kwargs):
         headers = {"apikey": self.api_key, "Content-Type": "application/json"}
+        prompt_str = prompt.to_string() if hasattr(prompt, 'to_string') else str(prompt)
         data = {
             "model": self.model,
             "messages": [{"role": "user", "content": prompt.to_string()}],
@@ -45,14 +46,8 @@ class LuxiaRagasLLM(BaseRagasLLM):
         text = res_json['choices'][0]['message']['content']
         return LLMResult(generations=[[Generation(text=text)]])
 
-
-def generate_text(self, prompt, **kwargs):
-    prompt_str = prompt.to_string() if hasattr(prompt, 'to_string') else str(prompt)
-    return self._call_api(prompt_str)
-
-
-async def agenerate_text(self, prompt, **kwargs):
-    return self.generate_text(prompt)
+    async def agenerate_text(self, prompt, **kwargs):
+        return self.generate_text(prompt)
 
 
 def _run_ragas(question, answer, contexts, reference, ragas_llm, ragas_embeddings):
