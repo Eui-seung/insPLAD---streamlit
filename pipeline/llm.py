@@ -11,7 +11,6 @@ def generate_report(class_name, anomaly_score, is_anomaly, context_docs=None, mo
         "apikey": API_KEY,
         "Content-Type": "application/json"
     }
-    context = "\n\n".join(context_docs)
     status = "ANOMALY DETECTED" if is_anomaly else "NORMAL"
 
     if context_docs:
