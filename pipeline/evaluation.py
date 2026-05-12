@@ -1,5 +1,5 @@
 from ragas import evaluate
-from ragas.metrics import faithfulness, answer_relevancy, context_precision
+from ragas.metrics import faithfulness, answer_relevancy, context_precision, context_recall
 from datasets import Dataset
 
 from langchain_openai import ChatOpenAI
@@ -20,9 +20,9 @@ def get_embeddings():
     return HuggingFaceEmbeddings(model_name="BAAI/bge-small-en-v1.5")
 
 class LuxiaRagasLLM(BaseRagasLLM):
-    def __init__(self, api_key):
+    def __init__(self, api_key, model="gpt-4o-mini"):
         self.api_key = api_key
-        self.url = "https://bridge.luxiacloud.com/llm/openai/chat/completions/gpt-4o-mini/create"
+        self.url = f"https://bridge.luxiacloud.com/llm/openai/chat/completions/{model}/create"
 
     def is_finished(self, *args):
         return True
@@ -30,13 +30,12 @@ class LuxiaRagasLLM(BaseRagasLLM):
     def set_usage(self, usage, *args):
         pass
 
-    def generate_text(self, prompt, n=1, temperature=1e-8, stop=None, **kwargs):
+    def generate_text(self, prompt, **kwargs):
         headers = {"apikey": self.api_key, "Content-Type": "application/json"}
         data = {
-            "model": "gpt-4o-mini-2024-07-18",
+            "model": self.model,
             "messages": [{"role": "user", "content": prompt.to_string()}],
         }
-        prompt_str = prompt.to_string() if hasattr(prompt, 'to_string') else str(prompt)
         response = requests.post(self.url, headers=headers, json=data)
         res_json = response.json()
         
@@ -46,34 +45,64 @@ class LuxiaRagasLLM(BaseRagasLLM):
         text = res_json['choices'][0]['message']['content']
         return LLMResult(generations=[[Generation(text=text)]])
 
-    async def agenerate_text(self, prompt, n=1, temperature=1e-8, stop=None, **kwargs):
-        return self.generate_text(prompt, n, temperature, stop)
+
+def generate_text(self, prompt, **kwargs):
+    prompt_str = prompt.to_string() if hasattr(prompt, 'to_string') else str(prompt)
+    return self._call_api(prompt_str)
 
 
-def evaluate_report(question, answer, contexts):
+async def agenerate_text(self, prompt, **kwargs):
+    return self.generate_text(prompt)
 
-    ragas_llm = LuxiaRagasLLM(api_key=API_KEY)
 
-    hf_embeddings = get_embeddings()
-
-    ragas_embeddings = LangchainEmbeddingsWrapper(hf_embeddings)
-
+def _run_ragas(question, answer, contexts, reference, ragas_llm, ragas_embeddings):
+    """contexts가 있으면 전체 지표, 없으면 reference 기반 지표만"""
     data = {
         "question": [question],
         "answer": [answer],
-        "contexts": [contexts],
-        # "reference": [reference],
+        "contexts": [contexts if contexts else [""]],
+        "reference": [reference],
     }
     dataset = Dataset.from_dict(data)
-    result = evaluate(dataset, 
-                      metrics=[faithfulness, answer_relevancy],
-                      llm=ragas_llm,
-                      embeddings=ragas_embeddings)
-    return {
+
+    metrics = [faithfulness, answer_relevancy]
+    if contexts:
+        metrics += [context_precision, context_recall]
+
+    result = evaluate(dataset, metrics=metrics, llm=ragas_llm, embeddings=ragas_embeddings)
+
+    scores = {
         "faithfulness": round(result["faithfulness"][0], 3),
         "answer_relevancy": round(result["answer_relevancy"][0], 3),
-        # "context_precision": round(result["context_precision"][0], 3),
     }
+    if contexts:
+        scores["context_precision"] = round(result["context_precision"][0], 3)
+        scores["context_recall"] = round(result["context_recall"][0], 3)
+    return scores
+
+
+def evaluate_report(question, contexts, answer_a, answer_b, answer_c):
+    """
+    answer_a: gpt-4o + RAG      → reference (baseline)
+    answer_b: gpt-4o-mini, no RAG
+    answer_c: gpt-4o-mini + RAG (현재 시스템)
+    """
+    ragas_llm = LuxiaRagasLLM(api_key=API_KEY, model="gpt-4o-mini")
+    ragas_llm = LuxiaRagasLLM(api_key=API_KEY, model="gpt-4o-mini")
+    ragas_embeddings = LangchainEmbeddingsWrapper(get_embeddings())
+
+    reference = answer_a  # gpt-4o+RAG 답변을 ground truth로 사용
+
+    print("=== [A] gpt-4o + RAG (baseline) ===")
+    scores_a = _run_ragas(question, answer_a, contexts, reference, ragas_llm, ragas_embeddings)
+
+    print("=== [B] gpt-4o-mini, no RAG ===")
+    scores_b = _run_ragas(question, answer_b, None, reference, ragas_llm, ragas_embeddings)
+
+    print("=== [C] gpt-4o-mini + RAG (현재 시스템) ===")
+    scores_c = _run_ragas(question, answer_c, contexts, reference, ragas_llm, ragas_embeddings)
+
+    return {"A_gpt4o_rag": scores_a, "B_mini_no_rag": scores_b, "C_mini_rag": scores_c}
 
 # pipeline/evaluation.py 맨 밑에 추가
 

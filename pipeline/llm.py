@@ -4,8 +4,8 @@ from dotenv import load_dotenv
 load_dotenv()
 API_KEY = os.getenv("OPEN_AI_API_KEY")
 
-def generate_report(class_name, anomaly_score, is_anomaly, context_docs):
-    url = "https://bridge.luxiacloud.com/llm/openai/chat/completions/gpt-4o-mini/create"
+def generate_report(class_name, anomaly_score, is_anomaly, context_docs=None, model="gpt-4o-mini"):
+    url = f"https://bridge.luxiacloud.com/llm/openai/chat/completions/{model}/create"
 
     headers = {
         "apikey": API_KEY,
@@ -14,8 +14,9 @@ def generate_report(class_name, anomaly_score, is_anomaly, context_docs):
     context = "\n\n".join(context_docs)
     status = "ANOMALY DETECTED" if is_anomaly else "NORMAL"
 
-    prompt = f"""You are an industrial inspection expert analyzing insPLAD dataset results.
-
+    if context_docs:
+        context = "\n\n".join(context_docs)
+        prompt = f"""You are an industrial inspection expert analyzing insPLAD dataset results.
 Reference documents (Use ONLY the information below):
 {context}
 
@@ -38,10 +39,26 @@ Generate a structured inspection report in English:
 4. Reference standards: Cite specific guidelines or thresholds mentioned in the context.
 
 Be concise and technical."""
+    else:
+        # RAG 없음 — 모델 자체 지식 사용
+        prompt = f"""You are an industrial inspection expert analyzing insPLAD dataset results.
 
+Inspection result data:
+- Component class: {class_name}
+- Anomaly score: {anomaly_score:.4f}
+- Status: {status}
+
+[Report Structure]
+Generate a structured inspection report in English:
+1. Summary: Brief overview of the current inspection state.
+2. Root cause analysis: Identify potential causes based on your expert knowledge.
+3. Recommendations: Technical actions to address the findings.
+4. Reference standards: Cite relevant industry standards if applicable.
+
+Be concise and technical."""
 
     data = {
-        "model": "gpt-4o-mini-2024-07-18",
+        "model": model,
         "messages": [
             {"role": "user", "content": prompt}
         ],
