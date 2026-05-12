@@ -16,19 +16,26 @@ def generate_report(class_name, anomaly_score, is_anomaly, context_docs):
 
     prompt = f"""You are an industrial inspection expert analyzing insPLAD dataset results.
 
-Reference documents:
+Reference documents (Use ONLY the information below):
 {context}
 
-Inspection result:
+Inspection result data:
 - Component class: {class_name}
 - Anomaly score: {anomaly_score:.4f}
 - Status: {status}
 
-Generate a structured inspection report in English with these sections:
-1. Summary
-2. Root cause analysis
-3. Recommendations
-4. Reference standards
+[Strict Constraints]
+1. DO NOT use any outside knowledge. Base the entire report ONLY on the provided Reference documents and Inspection result.
+2. If the Reference documents do not contain specific information for a section, state "Information not available in reference standards" rather than speculating.
+3. Match the Anomaly score and Status exactly as provided.
+4. Ensure every claim in the 'Root cause analysis' can be traced back to a specific line in the Reference documents.
+
+[Report Structure]
+Generate a structured inspection report in English:
+1. Summary: Brief overview of the current inspection state.
+2. Root cause analysis: Identify potential causes based solely on the provided context.
+3. Recommendations: Technical actions derived from the reference standards.
+4. Reference standards: Cite specific guidelines or thresholds mentioned in the context.
 
 Be concise and technical."""
 

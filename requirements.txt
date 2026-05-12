@@ -11,7 +11,11 @@ langchain
 boto3
 matplotlib
 langchain-huggingface
-boto3 python-dotenv
+boto3
+python-dotenv
 torch
 torchvision
 torchaudio
+opencv-python-headless 
+openvino
+optimum-intel

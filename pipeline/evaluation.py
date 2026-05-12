@@ -77,19 +77,19 @@ def evaluate_report(question, answer, contexts):
 
 # pipeline/evaluation.py 맨 밑에 추가
 
-if __name__ == "__main__":
+# if __name__ == "__main__":
 
-    # 가짜 데이터로 평가
-    question = "What are common defects in glass insulators?"
-    answer   = "Common defects include surface cracks, contamination, and partial discharge which can lead to failure."
-    contexts = [
-        "Glass insulators can develop surface cracks due to mechanical stress.",
-        "Contamination on glass insulators causes partial discharge and eventual failure.",
-    ]
-    # reference = "The common defects in glass insulators are surface cracks, contamination, and partial discharge."
+#     # 가짜 데이터로 평가
+#     question = "What are common defects in glass insulators?"
+#     answer   = "Common defects include surface cracks, contamination, and partial discharge which can lead to failure."
+#     contexts = [
+#         "Glass insulators can develop surface cracks due to mechanical stress.",
+#         "Contamination on glass insulators causes partial discharge and eventual failure.",
+#     ]
+#     # reference = "The common defects in glass insulators are surface cracks, contamination, and partial discharge."
 
-    scores = evaluate_report(question, answer, contexts)
+#     scores = evaluate_report(question, answer, contexts)
 
-    print("RAGAS 평가 결과:")
-    for metric, score in scores.items():
-        print(f"  {metric:25s}: {score}")
+#     print("RAGAS 평가 결과:")
+#     for metric, score in scores.items():
+#         print(f"  {metric:25s}: {score}")

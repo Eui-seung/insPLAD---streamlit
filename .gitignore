@@ -3,3 +3,6 @@ models/
 chroma_db/
 venv/
 *.jpg
+__pycache__/
+*.pem
+*.ppk
