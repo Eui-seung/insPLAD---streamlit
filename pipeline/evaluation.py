@@ -81,7 +81,7 @@ def _run_ragas(question, answer, contexts, reference, ragas_llm, ragas_embedding
     return scores
 
 
-def evaluate_report(question, contexts, answer_a, answer_b, answer_c):
+def evaluate_report(question, contexts, answer_a, answer_b=None, answer_c=None):
     """
     answer_a: gpt-4o + RAG      → reference (baseline)
     answer_b: gpt-4o-mini, no RAG
