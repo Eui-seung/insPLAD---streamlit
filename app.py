@@ -101,7 +101,7 @@ if uploaded:
 
             with st.spinner("품질 평가 중..."):
                 from pipeline.evaluation import evaluate_report
-                ragas = evaluate_report(query, report, docs)
+                ragas = evaluate_report(query, docs, report)
             st.markdown("### RAGAS 평가 점수")
             st.json(ragas)
 
