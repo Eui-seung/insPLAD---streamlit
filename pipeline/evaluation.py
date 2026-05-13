@@ -124,8 +124,8 @@ def evaluate_single(question, contexts, answer, ragas_llm=None, ragas_embeddings
     return {
         "faithfulness": round(result["faithfulness"][0], 3),
         "answer_relevancy": round(result["answer_relevancy"][0], 3),
-        "context_precision": "N/A (단일모드)",
-        "context_recall": "N/A (단일모드)",
+        "context_precision": "-",
+        "context_recall": "-",
     }
 
 # if __name__ == "__main__":
