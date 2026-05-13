@@ -11,6 +11,7 @@ from ragas.llms import BaseRagasLLM
 import requests, os
 import streamlit as st
 from dotenv import load_dotenv
+from ragas.dataset_schema import SingleTurnSample, EvaluationDataset
 
 load_dotenv()
 API_KEY = os.getenv("OPEN_AI_API_KEY")
@@ -52,16 +53,14 @@ class LuxiaRagasLLM(BaseRagasLLM):
 
 
 def _run_ragas(question, answer, contexts, reference, ragas_llm, ragas_embeddings):
-    """contexts가 있으면 전체 지표, 없으면 reference 기반 지표만"""
-    data = {
-        "question": [question],
-        "answer": [answer],
-        "contexts": [contexts if contexts else [""]],
-        "reference": [reference],
-    }
-    dataset = Dataset.from_dict(data)
+    sample = SingleTurnSample(
+        user_input=question,
+        response=answer,
+        retrieved_contexts=contexts if contexts else [""],
+        reference=reference,
+    )
+    dataset = EvaluationDataset(samples=[sample])
 
-    metrics = [faithfulness, answer_relevancy]
     if contexts:
         metrics = [faithfulness, answer_relevancy, context_precision, context_recall]
     else:
@@ -72,14 +71,9 @@ def _run_ragas(question, answer, contexts, reference, ragas_llm, ragas_embedding
     scores = {
         "faithfulness": round(result["faithfulness"][0], 3) if contexts else "-",
         "answer_relevancy": round(result["answer_relevancy"][0], 3),
+        "context_precision": round(result["context_precision"][0], 3) if contexts else "-",
+        "context_recall": round(result["context_recall"][0], 3) if contexts else "-",
     }
-    if contexts:
-        scores["context_precision"] = round(result["context_precision"][0], 3)
-        scores["context_recall"] = round(result["context_recall"][0], 3)
-    else:
-        scores["context_precision"] = "-"
-        scores["context_recall"] = "-"
-
     return scores
 
 
