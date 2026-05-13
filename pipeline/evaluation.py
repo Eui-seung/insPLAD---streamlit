@@ -63,17 +63,23 @@ def _run_ragas(question, answer, contexts, reference, ragas_llm, ragas_embedding
 
     metrics = [faithfulness, answer_relevancy]
     if contexts:
-        metrics += [context_precision, context_recall]
+        metrics = [faithfulness, answer_relevancy, context_precision, context_recall]
+    else:
+        metrics = [answer_relevancy]
 
     result = evaluate(dataset, metrics=metrics, llm=ragas_llm, embeddings=ragas_embeddings)
 
     scores = {
-        "faithfulness": round(result["faithfulness"][0], 3),
+        "faithfulness": round(result["faithfulness"][0], 3) if contexts else "-",
         "answer_relevancy": round(result["answer_relevancy"][0], 3),
     }
     if contexts:
         scores["context_precision"] = round(result["context_precision"][0], 3)
         scores["context_recall"] = round(result["context_recall"][0], 3)
+    else:
+        scores["context_precision"] = "-"
+        scores["context_recall"] = "-"
+
     return scores
 
 
