@@ -100,6 +100,16 @@ def evaluate_report(question, contexts, answer_a, answer_b=None, answer_c=None):
 
     return {"A_gpt4o_rag": scores_a, "B_mini_no_rag": scores_b, "C_mini_rag": scores_c}
 
+
+def evaluate_single(question, contexts, answer, ragas_llm=None, ragas_embeddings=None):
+    """단일 모드 전용 평가 (gpt-4o-mini + RAG)"""
+    if ragas_llm is None:
+        ragas_llm = LuxiaRagasLLM(api_key=API_KEY, model="gpt-4o-mini")
+    if ragas_embeddings is None:
+        ragas_embeddings = LangchainEmbeddingsWrapper(get_embeddings())
+
+    return _run_ragas(question, answer, contexts, answer, ragas_llm, ragas_embeddings)
+
 # pipeline/evaluation.py 맨 밑에 추가
 
 # if __name__ == "__main__":
