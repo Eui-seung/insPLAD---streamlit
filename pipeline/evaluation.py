@@ -79,6 +79,7 @@ def _run_ragas(question, answer, contexts, reference, ragas_llm, ragas_embedding
 
 def evaluate_report(question, contexts, answer_a, answer_b=None, answer_c=None):
     """
+    비교 모드 전용 평가
     answer_a: gpt-4o + RAG      → reference (baseline)
     answer_b: gpt-4o-mini, no RAG
     answer_c: gpt-4o-mini + RAG (현재 시스템)
@@ -108,9 +109,24 @@ def evaluate_single(question, contexts, answer, ragas_llm=None, ragas_embeddings
     if ragas_embeddings is None:
         ragas_embeddings = LangchainEmbeddingsWrapper(get_embeddings())
 
-    return _run_ragas(question, answer, contexts, answer, ragas_llm, ragas_embeddings)
+    sample = SingleTurnSample(
+        user_input=question,
+        response=answer,
+        retrieved_contexts=contexts,
+        reference=answer,
+    )
+    dataset = EvaluationDataset(samples=[sample])
 
-# pipeline/evaluation.py 맨 밑에 추가
+    # faithfulness + answer_relevancy만 측정
+    metrics = [faithfulness, answer_relevancy]
+    result = evaluate(dataset, metrics=metrics, llm=ragas_llm, embeddings=ragas_embeddings)
+
+    return {
+        "faithfulness": round(result["faithfulness"][0], 3),
+        "answer_relevancy": round(result["answer_relevancy"][0], 3),
+        "context_precision": "N/A (단일모드)",
+        "context_recall": "N/A (단일모드)",
+    }
 
 # if __name__ == "__main__":
 
