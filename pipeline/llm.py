@@ -14,30 +14,33 @@ def generate_report(class_name, anomaly_score, is_anomaly, context_docs=None, mo
     status = "ANOMALY DETECTED" if is_anomaly else "NORMAL"
 
     if context_docs:
-        context = "\n\n".join(context_docs)
-        prompt = f"""You are an industrial inspection expert analyzing insPLAD dataset results.
-Reference documents (Use ONLY the information below):
+            context = "\n\n".join(context_docs)
+            prompt = f"""You are an industrial inspection expert. Your task is to provide a HIGHLY RELEVANT and technical report based on the insPLAD dataset results.
+
+[Reference Context]
 {context}
 
-Inspection result data:
-- Component class: {class_name}
-- Anomaly score: {anomaly_score:.4f}
-- Status: {status}
+[Inspection Data]
+- Component: {class_name}
+- Anomaly Score: {anomaly_score:.4f}
+- Detection Status: {status}
 
-[Strict Constraints]
-1. DO NOT use any outside knowledge. Base the entire report ONLY on the provided Reference documents and Inspection result.
-2. If the Reference documents do not contain specific information for a section, state "Information not available in reference standards" rather than speculating.
-3. Match the Anomaly score and Status exactly as provided.
-4. Ensure every claim in the 'Root cause analysis' can be traced back to a specific line in the Reference documents.
+[Objective]
+Based on the data above, generate a report that DIRECTLY addresses the inspection findings. Ensure the answer is dense with relevant information and avoids generic disclaimers.
+
+[Task Instructions]
+1. Focus on the relationship between the {class_name} and the {status} status.
+2. Integrate the Reference Context naturally into the analysis to explain the {anomaly_score:.4f} score.
+3. If specific details are missing in the context, use your expert reasoning to maintain a professional report flow that remains consistent with the {class_name} inspection.
+4. Keep the response concise, technical, and strictly focused on the user's implicit question: "What does this inspection result mean?"
 
 [Report Structure]
-Generate a structured inspection report in English:
-1. Summary: Brief overview of the current inspection state.
-2. Root cause analysis: Identify potential causes based solely on the provided context.
-3. Recommendations: Technical actions derived from the reference standards.
-4. Reference standards: Cite specific guidelines or thresholds mentioned in the context.
+1. Summary: A direct overview of the {class_name}'s current state.
+2. Root Cause Analysis: Link the {status} status to potential technical failures mentioned in the context.
+3. Recommendations: Specific, actionable steps for a {class_name} with an anomaly score of {anomaly_score:.4f}.
+4. Reference Standards: List the technical guidelines utilized from the context.
 
-Be concise and technical."""
+Tone: Professional, Direct, and Highly Relevant."""
     else:
         # RAG 없음 — 모델 자체 지식 사용
         prompt = f"""You are an industrial inspection expert analyzing insPLAD dataset results.
