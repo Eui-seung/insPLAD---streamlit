@@ -37,7 +37,7 @@ if uploaded:
         col2.image(heatmap, caption="heatmap")
         col3.image(overlay, caption="overlay")
 
-        status = "이상" if is_anomaly else "정상"
+        status = "abnormal" if is_anomaly else "normal"
         st.metric("Anomaly Score", f"{score:.4f}", delta=status)
 
         with st.spinner("RAG Searching..."):
